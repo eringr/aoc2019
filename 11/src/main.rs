@@ -22,12 +22,14 @@ fn main() {
         com: intcode::IntcodeComputer::new(&STARTING_MEM[..]),
     };
 
-    grid[DIM/2][DIM/2] = Color::White;
+    if cfg!(feature = "part2") {
+        grid[DIM/2][DIM/2] = Color::White;
+    }
     while cycle_robot(&mut r, grid) {}
 
     let mut total = 0;
     for n in grid {
-        for (i, m) in n.iter().enumerate() {
+        for m in n.iter() {
             if let Color::Unpainted = *m {} else {total += 1}
             print!("{:?}", m);
         }
