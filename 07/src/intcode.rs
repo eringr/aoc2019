@@ -32,13 +32,7 @@ impl IntcodeComputer {
         if let RunMode::WaitingForInput(x) = self.pc {
             self.pc = RunMode::Running(x);
         }
-        loop {
-            let pc = match self.pc {
-                RunMode::Halted => return self.pc,
-                RunMode::WaitingForInput(_) => return self.pc,
-                RunMode::Running(x) => x,
-            };
-            
+        while let RunMode::Running(pc) = self.pc {
             let mut mem = &mut self.mem;
             let inst = mem[pc];
             let (opcode, mode_p1, mode_p2, mode_p3) = (
@@ -105,6 +99,7 @@ impl IntcodeComputer {
                 },
             }
         }
+        self.pc
     }
 }
 
