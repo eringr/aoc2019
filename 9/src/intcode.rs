@@ -27,21 +27,15 @@ impl IntcodeComputer {
         self.inputs.push_back(x);
     }
 
-    pub fn pop_output(&mut self) -> Option<i64> {
-        self.outputs.pop_front()
-    }
+    // pub fn pop_output(&mut self) -> Option<i64> {
+    //     self.outputs.pop_front()
+    // }
 
     pub fn cycle(&mut self) -> RunMode {
         if let RunMode::WaitingForInput(x) = self.pc {
             self.pc = RunMode::Running(x);
         }
-        loop {
-            let pc = match self.pc {
-                RunMode::Halted => return self.pc,
-                RunMode::WaitingForInput(_) => return self.pc,
-                RunMode::Running(x) => x,
-            };
-            
+        while let RunMode::Running(pc) = self.pc {
             let mem = &mut self.mem;
             let inst = mem[pc];
             let (opcode, mode_p1, mode_p2, mode_p3) = (
@@ -115,8 +109,7 @@ impl IntcodeComputer {
                     self.pc = RunMode::Running(pc+4);
                 },
                 Mnemonics::Arb => {
-                    let p1 = p1();
-                    self.relative_base += p1;
+                    self.relative_base += p1();
                     self.pc = RunMode::Running(pc+2);
                 },
                 _ => {
@@ -125,10 +118,11 @@ impl IntcodeComputer {
                 },
             }
         }
+        self.pc
     }
 }
 
-enum Mnemonics {Add,Mul,In,Out,Bne,Beq,Slt,Seq,Und,Arb}
+enum Mnemonics {Add,Mul,In,Out,Bne,Beq,Slt,Seq,Arb,Hlt,Und}
 
 impl Mnemonics {
     fn from_i64(o: i64) -> Self {
@@ -142,6 +136,7 @@ impl Mnemonics {
             7 => Self::Slt,
             8 => Self::Seq,
             9 => Self::Arb,
+            99 => Self::Hlt,
             _ => Self::Und,
         }
     }
